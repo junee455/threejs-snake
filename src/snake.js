@@ -1,3 +1,5 @@
+/** @module Snake */
+
 import * as THREE from "three";
 import { mergeBufferGeometries } from "three/examples/jsm/utils/BufferGeometryUtils";
 
@@ -89,37 +91,57 @@ function setupRender(selector) {
   };
 }
 
+// game constants
+const Direction = {
+  right: 1,
+  down: 2,
+  left: 3,
+  up: 4,
+};
+
+const Apple = 5;
+
+const snakeMaterial = new THREE.MeshLambertMaterial({ color: 0x44aa55 });
+
+const appleMaterial = new THREE.MeshBasicMaterial({ color: 0xff5555 });
+
+
+/**
+ * The snake game
+ * @constructor
+ * @param {{
+ *  width: number,
+ *  height: number,
+ *  teleportEnabled: boolean
+ * }} gameSettings
+ */
 export function Game(gameSettings) {
   this.isGameOver = false;
   document.querySelector("#score").innerHTML = "0";
 
   // size of the field cell
   const cellSize = 0.2;
+
   // move snake every N seconds
   let currentTime = 0;
+
+  this.movementSpeed = gameSettings.movementSpeed;
+  
   this.setMovementSpeed = (speed) => {
     movesPast = currentTime / (speed * 1000);
     this.movementSpeed = speed;
   };
 
-  this.movementSpeed = gameSettings.movementSpeed;
 
   const snakeRenderer = setupRender("#canvas");
 
   const geometry = new THREE.BoxGeometry(cellSize, cellSize, cellSize);
 
-  const material = new THREE.MeshLambertMaterial({ color: 0x44aa55 }); // greenish blue
-
-  const appleMaterial = new THREE.MeshBasicMaterial({ color: 0xff5555 });
-
-  let preHeadSegment = [];
-
   const appleMesh = new THREE.Mesh(geometry, appleMaterial);
-  appleMesh.visible = false;
 
   const snakeSegments = new THREE.InstancedMesh(
     geometry,
-    material,
+    snakeMaterial,
     gameSettings.width * gameSettings.height
   );
 
@@ -134,19 +156,15 @@ export function Game(gameSettings) {
 
   const dummy = new THREE.Object3D();
 
-  const Direction = {
-    right: 1,
-    down: 2,
-    left: 3,
-    up: 4,
-  };
-  const Apple = 5;
-
   this.teleportEnabled = !!gameSettings.teleportEnabled;
 
   let snakeLength = 3;
 
   let score = 0;
+
+  let movesPast = 0;
+  
+  let preHeadSegment = [];
 
   /**
    *  array representing the game state
@@ -181,8 +199,18 @@ export function Game(gameSettings) {
   ] = Direction.right;
   let currentHeadDirection = Direction.right;
 
-  // returns coords of the next segment depending on its direction
+  /**
+   * returns coords of the next segment depending on its direction
+   * @method
+   * @param {[number, number]} segment - the segment to move
+   * @param {boolean} teleportEnabled - are teleports enabled
+   * @param {boolean} removePortal - remove portal when segment traverses it
+   * @returns {[number, number]}
+   */
   this.nextSegment = (segment, teleportEnabled, removePortal = false) => {
+    /**
+     * @type {[number, number]}
+     */
     let result = [...segment];
     switch (this.field[segment[0]][segment[1]]) {
       case Direction.right:
@@ -201,22 +229,30 @@ export function Game(gameSettings) {
 
     if (teleportEnabled) {
       // teleportation happens
-      if (result[1] < 0 || result[1] === gameSettings.width) {
-        const portalIndex = this.portals.horizontal.indexOf(result[0]);
-        if (removePortal) {
-          if (portalIndex > -1) this.portals.horizontal.splice(portalIndex, 1);
-        } else {
-          if (portalIndex === -1) this.portals.horizontal.push(result[0]);
+
+      /**
+       * 
+       * @param {number} segmentPosition
+       * @param {number} portalPosiction 
+       * @param {number} size 
+       * @param {number[]} toPush 
+       */
+      function managePortals(segmentPosition, portalPosiction, size, toPush) {
+        if (segmentPosition < 0 || segmentPosition === size) {
+          const portalIndex = toPush.indexOf(portalPosiction);
+          const portalExists =  (portalIndex === -1) ? false : true;
+
+          if (removePortal && portalExists) {
+            toPush.splice(portalIndex, 1);
+          } else {
+            if (!portalExists) toPush.push(portalPosiction);
+          }
         }
       }
-      if (result[0] < 0 || result[0] === gameSettings.height) {
-        const portalIndex = this.portals.vertical.indexOf(result[1]);
-        if (removePortal) {
-          if (portalIndex > -1) this.portals.vertical.splice(portalIndex, 1);
-        } else {
-          if (portalIndex === -1) this.portals.vertical.push(result[1]);
-        }
-      }
+
+      managePortals(result[1], result[0], gameSettings.width, this.portals.horizontal);
+      managePortals(result[0], result[1], gameSettings.height, this.portals.vertical);
+      
       result[0] = (result[0] + gameSettings.height) % gameSettings.height;
       result[1] = (result[1] + gameSettings.width) % gameSettings.width;
     } else {
@@ -234,6 +270,11 @@ export function Game(gameSettings) {
     return result;
   };
 
+  /**
+   * Returns [X,Y] coords in 3D space
+   * @param {[number, number]} segment 
+   * @returns {[number, number]}
+   */
   function getSegmentCoords(segment) {
     return [
       segment[1] * cellSize -
@@ -245,8 +286,14 @@ export function Game(gameSettings) {
     ];
   }
 
-  // adds squares to places where portals should be opened
-  // used only for stencil testing
+  /**
+   * adds squares to places where portals should be opened\
+   * used only for stencil testing
+   * @type {{
+   *  horizontal: number[],
+   *  vertical: number[]
+   * }} portals
+   */
   this.portals = {
     horizontal: [],
     vertical: [],
@@ -292,6 +339,45 @@ export function Game(gameSettings) {
   };
 
   this.renderSnake = () => {
+
+    // smoothly moves tail and head
+    const animateHeadAndTail = (time) => {
+
+      let computeSegmentAnimation = (segment, time) => {
+        let delta = [0, 0];
+        switch (this.getCellValue(segment)) {
+          case Direction.right:
+            delta[0] = cellSize;
+            break;
+          case Direction.down:
+            delta[1] = -cellSize;
+            break;
+          case Direction.left:
+            delta[0] = -cellSize;
+            break;
+          case Direction.up:
+            delta[1] = cellSize;
+        }
+        const timeDelta =
+          (time - movesPast * this.movementSpeed * 1000) /
+          (this.movementSpeed * 1000);
+        let segmentCoords = getSegmentCoords(segment);
+        segmentCoords[0] += delta[0] * timeDelta;
+        segmentCoords[1] += delta[1] * timeDelta;
+        dummy.position.set(...segmentCoords, cellSize / 2);
+        dummy.updateMatrix();
+      }
+      
+      
+      computeSegmentAnimation(tailSegment, time);
+      snakeSegments.setMatrixAt(0, dummy.matrix);
+      
+      computeSegmentAnimation(preHeadSegment, time);
+      snakeSegments.count += 1;
+      snakeSegments.setMatrixAt(snakeSegments.count - 1, dummy.matrix);
+  
+    }
+    
     dummy.scale.set(1, 1, 1);
     dummy.updateMatrix();
     snakeSegments.count += snakeLength - 1;
@@ -307,7 +393,7 @@ export function Game(gameSettings) {
       currentSegment = this.nextSegment(currentSegment, this.teleportEnabled);
     }
 
-    this.animateHeadAndTail(currentTime);
+    animateHeadAndTail(currentTime);
   };
 
   this.getCellValue = (segment) => {
@@ -360,7 +446,6 @@ export function Game(gameSettings) {
       this.dropApple();
     } else {
       appleMesh.position.set(...getSegmentCoords(newApple), cellSize / 2);
-      appleMesh.visible = true;
       this.setCellValue(newApple, Apple);
     }
   };
@@ -394,8 +479,10 @@ export function Game(gameSettings) {
         break;
     }
   };
-
-  let movesPast = 0;
+  
+  window.removeEventListener("keydown", this.changeDirection);
+  window.addEventListener("keydown", this.changeDirection);
+  
 
   requestAnimationFrame((time) => {
     movesPast = time / (this.movementSpeed * 1000);
@@ -405,50 +492,11 @@ export function Game(gameSettings) {
     this.isGameOver = true;
     document.querySelector("#score").innerHTML =
       "Game Over\nTotal: " + String(score);
-  };
-
-  window.removeEventListener("keydown", this.changeDirection);
-  window.addEventListener("keydown", this.changeDirection);
-  // smoothly moves tail and head
+  };  
   
-  
-  this.animateHeadAndTail = (time) => {
-
-    let computeSegmentAnimation = (segment, time) => {
-      let delta = [0, 0];
-      switch (this.getCellValue(segment)) {
-        case Direction.right:
-          delta[0] = cellSize;
-          break;
-        case Direction.down:
-          delta[1] = -cellSize;
-          break;
-        case Direction.left:
-          delta[0] = -cellSize;
-          break;
-        case Direction.up:
-          delta[1] = cellSize;
-      }
-      const timeDelta =
-        (time - movesPast * this.movementSpeed * 1000) /
-        (this.movementSpeed * 1000);
-      let segmentCoords = getSegmentCoords(segment);
-      segmentCoords[0] += delta[0] * timeDelta;
-      segmentCoords[1] += delta[1] * timeDelta;
-      dummy.position.set(...segmentCoords, cellSize / 2);
-      dummy.updateMatrix();
-    }
-    
-    computeSegmentAnimation(tailSegment, time);
-    snakeSegments.setMatrixAt(0, dummy.matrix);
-    
-    computeSegmentAnimation(preHeadSegment, time);
-    snakeSegments.count += 1;
-    snakeSegments.setMatrixAt(snakeSegments.count - 1, dummy.matrix);
-
-  };
-
   this.render = (time) => {
+    
+    
     currentTime = time;
 
     if (
