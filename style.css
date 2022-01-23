@@ -1,0 +1,82 @@
+body,
+html {
+  margin: 0;
+  overflow: hidden;
+}
+
+button {
+  display: block;
+  color: white;
+  background-color: black;
+  border: 2px solid white;
+  padding: 5px;
+  padding-left: 10px;
+  padding-right: 10px;
+  margin: 10px;
+  border-radius: 5px;
+  font-size: 30px;
+}
+
+#canvas {
+  width: 100%;
+  height: 100%;
+}
+
+.header {
+  position: absolute;
+  display: flex;
+  flex-direction: row-reverse;
+  width: 100%;
+  color: white;
+  justify-content: space-between;
+  user-select: none;
+  font-size: 20px;
+}
+.header div {
+  padding: 10px;
+}
+.header #settings-block {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transition: 0.5s;
+}
+.header #settings-block input {
+  max-width: 30px;
+  font-size: 20px;
+  background-color: transparent;
+  border: none;
+  outline: none;
+  color: white;
+  border-bottom: 2px solid white;
+}
+.header #settings-block .range {
+  max-width: 100px;
+}
+.header #settings-block span {
+  margin-right: 20px;
+}
+.header .shown {
+  margin-top: 0;
+}
+.header .hidden {
+  margin-top: -100%;
+}
+
+#score {
+  position: absolute;
+  width: 100%;
+  top: 0;
+  font-size: 30px;
+  text-align: center;
+  white-space: pre-line;
+  color: white;
+}
+
+.controls {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  display: flex;
+  justify-content: space-around;
+}
