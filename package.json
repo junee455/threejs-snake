@@ -1,0 +1,25 @@
+{
+  "name": "three-snake",
+  "version": "1.0.0",
+  "main": "src/main.js",
+  "author": "Mikhail Maslyanskiy <michaelma455@gmail.com>",
+  "license": "MIT",
+  "scripts": {
+    "build": "webpack --config webpack.config.js",
+    "serve": "webpack serve"
+  },
+  "devDependencies": {
+    "file-loader": "^6.2.0",
+    "sass": "^1.49.0",
+    "sass-loader": "^12.4.0",
+    "three": "^0.136.0",
+    "webpack": "^5.66.0",
+    "webpack-cli": "^4.9.1",
+    "webpack-dev-server": "^4.7.3"
+  },
+  "dependencies": {
+    "-": "^0.0.1",
+    "css-loader": "^6.5.1",
+    "style-loader": "^3.3.1"
+  }
+}
