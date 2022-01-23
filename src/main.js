@@ -10,6 +10,7 @@ export function setHeight(value) {
   gameSettings.height = Number(value);
 }
 
+/** @type {Game} */
 var currentGame = undefined;
 
 export function startGame() {
