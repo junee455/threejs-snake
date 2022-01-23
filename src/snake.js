@@ -115,7 +115,10 @@ const appleMaterial = new THREE.MeshBasicMaterial({ color: 0xff5555 });
  * }} gameSettings
  */
 export function Game(gameSettings) {
-  this.isGameOver = false;
+  let isGameOver = false;
+  this.isGameOver = () => {
+    return isGameOver;
+  };
   document.querySelector("#score").innerHTML = "0";
 
   // size of the field cell
@@ -159,6 +162,10 @@ export function Game(gameSettings) {
 
   let score = 0;
 
+  this.getScore = () => {
+    return score;
+  };
+
   let movesPast = 0;
 
   let preHeadSegment = [];
@@ -167,14 +174,16 @@ export function Game(gameSettings) {
    *  array representing the game state
    * @type {Array<Direction | Apple | undefined>}
    */
-  this.field = [];
-
-  for (let i = 0; i < gameSettings.height; i++) {
-    this.field.push([]);
-    for (let j = 0; j < gameSettings.width; j++) {
-      this.field[i].push(undefined);
+  const field = (() => {
+    let result = [];
+    for (let i = 0; i < gameSettings.height; i++) {
+      result.push([]);
+      for (let j = 0; j < gameSettings.width; j++) {
+        result[i].push(undefined);
+      }
     }
-  }
+    return result;
+  })();
 
   let tailSegment = [
     Math.floor(gameSettings.height / 2),
@@ -185,13 +194,13 @@ export function Game(gameSettings) {
     Math.floor(gameSettings.width / 2) + 1,
   ];
 
-  this.field[Math.floor(gameSettings.height / 2)][
+  field[Math.floor(gameSettings.height / 2)][
     Math.floor(gameSettings.width / 2) - 1
   ] = Direction.right;
-  this.field[Math.floor(gameSettings.height / 2)][
+  field[Math.floor(gameSettings.height / 2)][
     Math.floor(gameSettings.width / 2)
   ] = Direction.right;
-  this.field[Math.floor(gameSettings.height / 2)][
+  field[Math.floor(gameSettings.height / 2)][
     Math.floor(gameSettings.width / 2) + 1
   ] = Direction.right;
   let currentHeadDirection = Direction.right;
@@ -209,7 +218,7 @@ export function Game(gameSettings) {
      * @type {[number, number]}
      */
     let result = [...segment];
-    switch (this.field[segment[0]][segment[1]]) {
+    switch (field[segment[0]][segment[1]]) {
       case Direction.right:
         result[1]++;
         break;
@@ -399,11 +408,11 @@ export function Game(gameSettings) {
   };
 
   const getCellValue = (segment) => {
-    return this.field[segment[0]][segment[1]];
+    return field[segment[0]][segment[1]];
   };
 
   const setCellValue = (segment, value) => {
-    this.field[segment[0]][segment[1]] = value;
+    field[segment[0]][segment[1]] = value;
   };
 
   const nextTurn = () => {
@@ -431,11 +440,11 @@ export function Game(gameSettings) {
     }
     setCellValue(headSegment, headDirection);
     if (dropNewApple) {
-      this.dropApple();
+      dropApple();
     }
   };
 
-  this.dropApple = () => {
+  const dropApple = () => {
     function getRandomInt(max) {
       return Math.floor(Math.random() * max);
     }
@@ -445,14 +454,14 @@ export function Game(gameSettings) {
     ];
     // if the segment is occupied try generate a new one;
     if (getCellValue(newApple)) {
-      this.dropApple();
+      dropApple();
     } else {
       appleMesh.position.set(...getSegmentCoords(newApple), cellSize / 2);
       setCellValue(newApple, Apple);
     }
   };
 
-  this.dropApple();
+  dropApple();
 
   this.changeDirection = (event) => {
     if (event.stopPropagation) {
@@ -490,7 +499,7 @@ export function Game(gameSettings) {
   });
 
   this.gameOver = () => {
-    this.isGameOver = true;
+    isGameOver = true;
     document.querySelector("#score").innerHTML =
       "Game Over\nTotal: " + String(score);
   };
@@ -500,7 +509,7 @@ export function Game(gameSettings) {
 
     if (time - movesPast * movementSpeed * 1000 > movementSpeed * 1000) {
       movesPast++;
-      if (!this.isGameOver) {
+      if (!isGameOver) {
         nextTurn();
       } else {
         return;
