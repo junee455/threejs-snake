@@ -45,7 +45,7 @@ button {
     transition: 0.5s;
 
     input {
-      max-width: $bigger-font-size;
+      max-width: calc($bigger-font-size * 2);
       font-size: $font-size;
       background-color: transparent;
       border: none;

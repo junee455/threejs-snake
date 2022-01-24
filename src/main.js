@@ -10,6 +10,7 @@ export function setHeight(value) {
   gameSettings.height = Number(value);
 }
 
+/** @type {Game} */
 var currentGame = undefined;
 
 export function startGame() {
@@ -17,6 +18,17 @@ export function startGame() {
     currentGame.gameOver();
   }
   currentGame = new Game({ ...gameSettings });
+}
+
+/**
+ * Sets snakes color
+ * @param {'r' | 'g' | 'b'} component
+ * @param {number} value
+ */
+export function setColor(component, value) {
+  gameSettings.color[component] = Number(value) / 100;
+
+  currentGame.setColor(gameSettings.color);
 }
 
 /**
@@ -46,6 +58,11 @@ export var gameSettings = {
    * the less the value the faster the game
    */
   movementSpeed: 0.3,
+  color: {
+    r: 0.1,
+    g: 0.1,
+    b: 0.1,
+  },
 };
 
 export function toggleSettings() {
