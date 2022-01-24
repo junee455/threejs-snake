@@ -21,6 +21,17 @@ export function startGame() {
 }
 
 /**
+ * Sets snakes color
+ * @param {'r' | 'g' | 'b'} component
+ * @param {number} value
+ */
+export function setColor(component, value) {
+  gameSettings.color[component] = Number(value) / 100;
+
+  currentGame.setColor(gameSettings.color);
+}
+
+/**
  * Changes snake direction. Possible directions: Left, Right, Up, Down
  * @param {string} direction
  * */
@@ -47,6 +58,11 @@ export var gameSettings = {
    * the less the value the faster the game
    */
   movementSpeed: 0.3,
+  color: {
+    r: 1,
+    g: 1,
+    b: 1,
+  },
 };
 
 export function toggleSettings() {

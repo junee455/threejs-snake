@@ -101,7 +101,9 @@ const Direction = {
 
 const Apple = 5;
 
-const snakeMaterial = new THREE.MeshLambertMaterial({ color: 0x44aa55 });
+let snakeMaterial = new THREE.MeshLambertMaterial({
+  color: new THREE.Color(1, 1, 1),
+});
 
 const appleMaterial = new THREE.MeshBasicMaterial({ color: 0xff5555 });
 
@@ -111,7 +113,8 @@ const appleMaterial = new THREE.MeshBasicMaterial({ color: 0xff5555 });
  * @param {{
  *  width: number,
  *  height: number,
- *  teleportEnabled: boolean
+ *  teleportEnabled: boolean,
+ *  color: string
  * }} gameSettings
  */
 export function Game(gameSettings) {
@@ -497,6 +500,26 @@ export function Game(gameSettings) {
   requestAnimationFrame((time) => {
     movesPast = time / (movementSpeed * 1000);
   });
+
+  this.currentColor = gameSettings.color;
+
+  /**
+   *
+   * @param {{
+   *  r: number,
+   *  g: number,
+   *  b: number
+   * }} color
+   */
+  this.setColor = (color) => {
+    this.currentColor = color;
+    snakeMaterial.dispose();
+    snakeMaterial = new THREE.MeshLambertMaterial({
+      color: new THREE.Color(color.r, color.g, color.b),
+    });
+    snakeSegments.material = snakeMaterial;
+    snakeSegments.needsUpdate();
+  };
 
   this.gameOver = () => {
     isGameOver = true;

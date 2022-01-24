@@ -1,74 +1,120 @@
 <!DOCTYPE html>
 
 <html>
-    <head>
-        <link rel="stylesheet" href="style.css">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"> 
-        <script src="main.js"></script>
-    </head>
-    <body>
-        <div id="score">0</div>
+  <head>
+    <link rel="stylesheet" href="style.css" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <script src="main.js"></script>
+  </head>
+  <body>
+    <div id="score">0</div>
 
-        <div class="header">
-            
-            <div id="settings-block"
-            class="hidden">
-            <div>
-                <span>width</span>
-                <input value="10" onchange="Snake.setWidth(this.value)" type="number">
-            </div>
-            <div>
-                <span>height</span>
-                <input value="10" onchange="Snake.setHeight(this.value)" type="number">
-            </div>
-            <div>
-                <span>teleports</span>
-                <input checked onchange="Snake.toggleTeleports(this.checked)" type="checkbox">
-            </div>
-            <div>
-                <span>Game speed</span>
-                <input class="range" onchange="Snake.setGameSpeed(Number(this.value))" type="range">
-            </div>
-                <button onclick="Snake.startGame()">Apply</button>
-            </div>
+    <div class="header">
+      <div id="settings-block" class="hidden">
+        <div>Color:</div>
+        <div>
+          <span>red</span>
+          <input
+            value="10"
+            onchange="Snake.setColor('r', this.value)"
+            type="number"
+          />
         </div>
-        <canvas id="canvas"></canvas>
-        <div class="controls">
-            <table>
-                <tr>
-                    <td></td>
-                    <td>
-                        <button onclick="Snake.changeDirection('Up')">▲</button>
-                    </td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <td>
-                        <button
-                        style="margin: auto; margin-right: 10px"
-                        onclick="Snake.changeDirection('Left')">◀</button>
-                    </td>
-                    <td></td>
-                    <td>
-                        <button onclick="Snake.changeDirection('Right')">▶</button>
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <button id="settings"
-                        onclick="Snake.toggleSettings()">Settings</button>
-                    </td>
-                    <td>
-                        <button onclick="Snake.changeDirection('Down')">▼</button>
-                    </td>
-                    <td>
-                        <button onclick="Snake.startGame()">Restart</button>
-                    </td>
-                </tr>
-            </table>
+        <div>
+          <span>green</span>
+          <input
+            value="10"
+            onchange="Snake.setColor('g', this.value)"
+            type="number"
+          />
         </div>
-        <script type="text/javascript">
-            Snake.startGame()
-        </script>
-    </body>
+        <div>
+          <span>blue</span>
+          <input
+            value="10"
+            onchange="Snake.setColor('b', this.value)"
+            type="number"
+          />
+        </div>
+        <div>
+          <span>width</span>
+          <input
+            value="10"
+            onchange="Snake.setWidth(this.value)"
+            type="number"
+          />
+        </div>
+        <div>
+          <span>height</span>
+          <input
+            value="10"
+            onchange="Snake.setHeight(this.value)"
+            type="number"
+          />
+        </div>
+        <div>
+          <span>teleports</span>
+          <input
+            checked
+            onchange="Snake.toggleTeleports(this.checked)"
+            type="checkbox"
+          />
+        </div>
+        <div>
+          <span>Game speed</span>
+          <input
+            class="range"
+            onchange="Snake.setGameSpeed(Number(this.value))"
+            type="range"
+          />
+        </div>
+        <button onclick="Snake.startGame()">Apply</button>
+      </div>
+    </div>
+    <canvas id="canvas"></canvas>
+    <div class="controls">
+      <table>
+        <tr>
+          <td></td>
+          <td>
+            <button onclick="Snake.changeDirection('Up')">▲</button>
+          </td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>
+            <button
+              style="margin: auto; margin-right: 10px"
+              onclick="Snake.changeDirection('Left')"
+            >
+              ◀
+            </button>
+          </td>
+          <td></td>
+          <td>
+            <button onclick="Snake.changeDirection('Right')">▶</button>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <button id="settings" onclick="Snake.toggleSettings()">
+              Settings
+            </button>
+          </td>
+          <td>
+            <button onclick="Snake.changeDirection('Down')">▼</button>
+          </td>
+          <td>
+            <button onclick="Snake.startGame()">Restart</button>
+          </td>
+        </tr>
+      </table>
+    </div>
+    <script type="text/javascript">
+      Snake.startGame();
+    </script>
+  </body>
 </html>
