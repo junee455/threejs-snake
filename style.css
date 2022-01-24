@@ -42,7 +42,7 @@ button {
   transition: 0.5s;
 }
 .header #settings-block input {
-  max-width: 30px;
+  max-width: 60px;
   font-size: 20px;
   background-color: transparent;
   border: none;
