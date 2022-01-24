@@ -59,9 +59,9 @@ export var gameSettings = {
    */
   movementSpeed: 0.3,
   color: {
-    r: 1,
-    g: 1,
-    b: 1,
+    r: 0.1,
+    g: 0.1,
+    b: 0.1,
   },
 };
 
